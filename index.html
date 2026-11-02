@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulacro CRM</title>
+  <style>
+    :root {
+      --azul: #1f4e79;
+      --fondo: #f4f6f8;
+      --borde: #d9dee5;
+      --texto: #1d2733;
+      --suave: #66727f;
+      --ok: #2e7d32;
+      --error: #c62828;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fondo); color: var(--texto); }
+    header { background: var(--azul); color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+    header button { background: transparent; border: 1px solid #fff; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    main { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .card { background: #fff; border: 1px solid var(--borde); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .card h2 { margin: 0 0 12px; font-size: 1.05rem; color: var(--azul); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .auth { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 760px; margin: 60px auto; }
+    @media (max-width: 800px) { .grid, .auth { grid-template-columns: 1fr; } }
+    form { display: grid; gap: 8px; }
+    label { font-size: .85rem; display: grid; gap: 4px; }
+    input, select, textarea { padding: 8px; border: 1px solid var(--borde); border-radius: 6px; font: inherit; }
+    textarea { min-height: 70px; resize: vertical; }
+    button.primario { background: var(--azul); color: #fff; border: 0; padding: 9px 14px; border-radius: 6px; cursor: pointer; }
+    button.secundario { background: #fff; border: 1px solid var(--borde); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); }
+    tr.seleccionado { background: #e8f0f8; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat { background: #fff; border: 1px solid var(--borde); border-radius: 10px; padding: 12px; text-align: center; }
+    .stat strong { display: block; font-size: 1.5rem; color: var(--azul); }
+    ul { padding-left: 18px; margin: 0 0 12px; font-size: .9rem; }
+    li { margin-bottom: 6px; }
+    .mensaje { margin: 12px auto; max-width: 1200px; padding: 10px 14px; border-radius: 6px; }
+    .mensaje.ok { background: #e8f5e9; color: var(--ok); }
+    .mensaje.error { background: #ffebee; color: var(--error); }
+    .vacio { color: var(--suave); font-size: .9rem; }
+    .oculto { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div id="mensaje" class="mensaje oculto"></div>
+
+  <!-- Vista de acceso -->
+  <section id="vista-auth" class="oculto">
+    <div class="auth">
+      <div class="card">
+        <h2>Acceder</h2>
+        <form id="form-login">
+          <label>Correo electrónico
+            <input name="email" type="email" required autocomplete="email">
+          </label>
+          <label>Contraseña
+            <input name="password" type="password" required minlength="6" autocomplete="current-password">
+          </label>
+          <button class="primario" type="submit">Entrar</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Crear cuenta</h2>
+        <form id="form-registro">
+          <label>Nombre
+            <input name="nombre" required>
+          </label>
+          <label>Correo electrónico
+            <input name="email" type="email" required autocomplete="email">
+          </label>
+          <label>Contraseña (mínimo 6 caracteres)
+            <input name="password" type="password" required minlength="6" autocomplete="new-password">
+          </label>
+          <button class="primario" type="submit">Crear cuenta</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vista de la aplicación -->
+  <section id="vista-app" class="oculto">
+    <header>
+      <strong>Simulacro CRM</strong>
+      <div>
+        <span id="nombre-usuario"></span>
+        <button id="btn-salir">Salir</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="stats">
+        <div class="stat"><strong id="kpi-clientes">0</strong>Clientes</div>
+        <div class="stat"><strong id="kpi-interacciones">0</strong>Interacciones</div>
+        <div class="stat"><strong id="kpi-oportunidades">0</strong>Oportunidades</div>
+      </div>
+
+      <div class="grid">
+        <!-- Cartera -->
+        <div class="card">
+          <h2>Nuevo cliente</h2>
+          <form id="form-cliente">
+            <label>Nombre *<input name="nombre" required></label>
+            <label>Empresa<input name="empresa"></label>
+            <label>Sector
+              <select name="sector">
+                <option value="">Sin especificar</option>
+                <option>Retail</option>
+                <option>Servicios financieros</option>
+                <option>Tecnología</option>
+                <option>Salud</option>
+                <option>Educación</option>
+                <option>Industria</option>
+                <option>Hostelería</option>
+              </select>
+            </label>
+            <label>Email<input name="email" type="email"></label>
+            <label>Teléfono<input name="telefono"></label>
+            <button class="primario" type="submit">Añadir a mi cartera</button>
+          </form>
+
+          <h2 style="margin-top: 20px;">Mi cartera</h2>
+          <table>
+            <thead><tr><th>Nombre</th><th>Empresa</th><th>Sector</th><th></th></tr></thead>
+            <tbody id="tabla-clientes"></tbody>
+          </table>
+          <p id="sin-clientes" class="vacio oculto">Todavía no tienes clientes en tu cartera.</p>
+        </div>
+
+        <!-- Cliente seleccionado -->
+        <div class="card">
+          <h2>Cliente seleccionado</h2>
+          <p id="sin-seleccion" class="vacio">Selecciona un cliente de tu cartera para registrar interacciones y oportunidades.</p>
+
+          <div id="panel-cliente" class="oculto">
+            <p id="titulo-cliente"><strong></strong></p>
+
+            <h2>Registrar interacción</h2>
+            <form id="form-interaccion">
+              <label>Canal
+                <select name="canal" required>
+                  <option value="email">Email</option>
+                  <option value="telefono">Teléfono</option>
+                  <option value="web">Web</option>
+                  <option value="redes">Redes sociales</option>
+                  <option value="presencial">Presencial</option>
+                </select>
+              </label>
+              <label>Resultado
+                <select name="resultado">
+                  <option value="">Sin especificar</option>
+                  <option value="positivo">Positivo</option>
+                  <option value="neutro">Neutro</option>
+                  <option value="negativo">Negativo</option>
+                </select>
+              </label>
+              <label>Notas<textarea name="notas"></textarea></label>
+              <button class="primario" type="submit">Guardar interacción</button>
+            </form>
+
+            <h2 style="margin-top: 16px;">Historial</h2>
+            <ul id="lista-interacciones"></ul>
+
+            <h2>Nueva oportunidad</h2>
+            <form id="form-oportunidad">
+              <label>Título *<input name="titulo" required></label>
+              <label>Importe (€)<input name="importe" type="number" min="0" step="0.01" value="0"></label>
+              <label>Fase
+                <select name="fase">
+                  <option value="prospeccion">Prospección</option>
+                  <option value="propuesta">Propuesta</option>
+                  <option value="negociacion">Negociación</option>
+                  <option value="ganada">Ganada</option>
+                  <option value="perdida">Perdida</option>
+                </select>
+              </label>
+              <button class="primario" type="submit">Crear oportunidad</button>
+            </form>
+
+            <h2 style="margin-top: 16px;">Oportunidades</h2>
+            <ul id="lista-oportunidades"></ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
