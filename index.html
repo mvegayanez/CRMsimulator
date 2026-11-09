@@ -42,7 +42,34 @@
     .mensaje.ok { background: #e8f5e9; color: var(--ok); }
     .mensaje.error { background: #ffebee; color: var(--error); }
     .vacio { color: var(--suave); font-size: .9rem; }
+    #form-editar label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; }
+    #form-editar input[type="checkbox"] { width: auto; margin: 0; }
+    .aviso { color: #b45309; font-size: .85rem; margin: -4px 0 8px; }
+    .encargo-texto { background: #eef3f8; border-left: 4px solid var(--azul); border-radius: 6px; padding: 10px 14px; margin: 8px 0; }
+    .encargo-estado { font-size: .9rem; margin-top: 8px; }
     .oculto { display: none !important; }
+    .tabs { display: flex; gap: 8px; background: #fff; border-bottom: 1px solid var(--borde); padding: 10px 20px; }
+    .tab { background: #fff; border: 1px solid var(--borde); border-radius: 6px; padding: 7px 14px; cursor: pointer; font: inherit; }
+    .tab.activa { background: var(--azul); color: #fff; border-color: var(--azul); }
+    .filtros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .filtros select, .regla-form select, .regla-form input { min-width: 0; width: 100%; }
+    .filtros label, .regla-form label { font-size: .85rem; }
+    .acciones { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+    .paginacion { display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin-top: 10px; font-size: .9rem; }
+    .tabla-scroll { overflow-x: auto; max-height: 460px; overflow-y: auto; }
+    .lista-scroll { max-height: 320px; overflow-y: auto; margin-top: 10px; font-size: .9rem; }
+    .grupo-dup { border-bottom: 1px solid var(--borde); padding: 6px 0; }
+    .grupo-dup label { display: block; margin-left: 10px; font-size: .9rem; }
+    .regla-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+    .pregunta { border: 1px solid var(--borde); border-radius: 8px; margin-bottom: 10px; padding: 8px 12px; }
+    .pregunta label { display: block; font-size: .9rem; margin: 3px 0; }
+    #resultado-sesion2 { margin-top: 10px; background: #f0f6fb; border-radius: 8px; padding: 10px 14px; font-size: .95rem; }
+    #s2 .stats { grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 800px) {
+      .filtros { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+      .regla-form { grid-template-columns: minmax(0, 1fr); }
+      #s2 .stats { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -92,7 +119,12 @@
       </div>
     </header>
 
-    <main>
+    <nav class="tabs">
+      <button class="tab activa" data-tab="s1">Sesión 1 · Cartera</button>
+      <button class="tab" data-tab="s2">Sesión 2 · Base de datos</button>
+    </nav>
+
+    <main id="s1">
       <div class="stats">
         <div class="stat"><strong id="kpi-clientes">0</strong>Clientes</div>
         <div class="stat"><strong id="kpi-interacciones">0</strong>Interacciones</div>
@@ -185,6 +217,184 @@
             <ul id="lista-oportunidades"></ul>
           </div>
         </div>
+      </div>
+    </main>
+
+    <main id="s2" class="oculto">
+      <div id="s2-sin-caso" class="card oculto">
+        <h2>Sesión 2 · Base de datos</h2>
+        <p>Todavía no tienes una base de datos asignada. Espera a que el profesor la genere.</p>
+      </div>
+
+      <div id="s2-contenido" class="oculto">
+        <div class="card">
+          <h2>Diagnóstico de la base</h2>
+          <p class="vacio">Antes de tocar nada, lee estos indicadores: te dicen qué conviene revisar.</p>
+          <div class="stats">
+            <div class="stat"><strong id="kpi-total">0</strong>Registros</div>
+            <div class="stat"><strong id="kpi-email">0</strong>Emails no válidos</div>
+            <div class="stat"><strong id="kpi-sin-sector">0</strong>Sin sector</div>
+            <div class="stat"><strong id="kpi-sin-contacto">0</strong>Más de 90 días sin contacto</div>
+            <div class="stat"><strong id="kpi-inactivos">0</strong>Inactivos</div>
+          </div>
+        </div>
+
+        <div class="card" id="card-encargo">
+          <h2>Tu encargo</h2>
+          <div id="encargo-contenido"><p class="vacio">Cargando…</p></div>
+        </div>
+
+        <div class="card">
+          <h2>Explorar y filtrar</h2>
+          <form id="form-filtros" class="filtros">
+            <label>Buscar (nombre, empresa o email)<input name="texto" autocomplete="off"></label>
+            <label>División<select name="division"></select></label>
+            <label>Sector<select name="sector"></select></label>
+            <label>Tipo de cliente<select name="tipo"></select></label>
+            <label>Último canal<select name="canal"></select></label>
+            <label>Estado<select name="estado"></select></label>
+            <label>Email válido<select name="email_valido"></select></label>
+            <label>Sin sector<select name="sin_sector"></select></label>
+          </form>
+          <p id="vista-actual" class="vacio"></p>
+          <div class="tabla-scroll">
+            <table>
+              <thead>
+                <tr><th>Nombre</th><th>Empresa</th><th>Sector</th><th>Email</th><th>Último contacto</th><th>Estado</th><th>Importe</th><th>Marca</th></tr>
+              </thead>
+              <tbody id="tabla-registros"></tbody>
+            </table>
+          </div>
+          <div class="paginacion">
+            <button class="secundario" id="btn-anterior" type="button">Anterior</button>
+            <span id="paginacion-texto"></span>
+            <button class="secundario" id="btn-siguiente" type="button">Siguiente</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h2>Editar un registro</h2>
+            <p id="sin-registro" class="vacio">Pulsa un registro de la tabla para corregirlo.</p>
+            <form id="form-editar" class="oculto">
+              <p class="vacio">Email original: <span id="email-original"></span></p>
+              <label>Nombre<input name="nombre" required></label>
+              <label>Empresa<input name="empresa"></label>
+              <label>Sector<select name="sector"></select></label>
+              <label>Email<input name="email"></label>
+              <p id="motivo-email" class="aviso oculto"></p>
+              <label>Teléfono<input name="telefono"></label>
+              <label><input type="checkbox" name="es_duplicado"> Marcar como duplicado</label>
+              <div class="acciones"><button class="primario" type="submit">Guardar cambios</button></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2>Duplicados</h2>
+            <p class="vacio">Agrupa los registros que comparten email (sin distinguir mayúsculas ni espacios). Marca los que sobran y deja uno sin marcar.</p>
+            <button class="secundario" id="btn-buscar-duplicados" type="button">Buscar posibles duplicados</button>
+            <div id="lista-duplicados" class="lista-scroll"></div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h2>Crear un segmento</h2>
+            <div class="regla-form">
+              <label>Campo<select id="regla-campo"></select></label>
+              <div id="regla-valor"></div>
+              <button class="secundario" id="btn-agregar-regla" type="button">Añadir regla</button>
+            </div>
+            <ul id="lista-reglas"></ul>
+            <p id="conteo-segmento" class="vacio"></p>
+            <div class="acciones">
+              <button class="secundario" id="btn-contar-regla" type="button">Contar clientes</button>
+              <button class="secundario" id="btn-ver-regla" type="button">Ver en la tabla</button>
+            </div>
+            <form id="form-segmento">
+              <label>Nombre del segmento<input name="nombre" required></label>
+              <div class="acciones"><button class="primario" type="submit">Guardar segmento</button></div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2>Mis segmentos y acciones</h2>
+            <label>Tipo de acción
+              <select id="tipo-accion">
+                <option value="llamar">Llamar</option>
+                <option value="email">Enviar email</option>
+                <option value="visita">Visitar</option>
+              </select>
+            </label>
+            <ul id="lista-segmentos"></ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Consultas</h2>
+          <p class="vacio">Para responder, cuenta clientes con los filtros de la tabla o con «Contar clientes» en «Crear un segmento». Cada respuesta se puede comprobar con tus propios datos.</p>
+          <div id="lista-consultas"></div>
+          <div class="acciones">
+            <button class="primario" id="btn-guardar-consultas" type="button">Guardar respuestas</button>
+            <button class="secundario" id="btn-mi-resultado" type="button">Ver mi calificación</button>
+          </div>
+          <div id="resultado-sesion2"></div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Vista del profesor (solo lectura) -->
+  <section id="vista-profesor" class="oculto">
+    <header>
+      <strong>Simulacro CRM · Panel del profesor</strong>
+      <div>
+        <span id="nombre-profesor"></span>
+        <button id="btn-salir-profesor">Salir</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <h2>Progreso por alumno</h2>
+        <table>
+          <thead>
+            <tr><th>Alumno</th><th>Clientes</th><th>Interacciones</th><th>Oportunidades</th><th>Importe (€)</th><th></th></tr>
+          </thead>
+          <tbody id="tabla-alumnos"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Sesión 2 · Base de datos</h2>
+        <p class="vacio">Genera una base de 3.000 registros, cinco preguntas y un encargo de campaña para cada alumno que todavía no tenga caso. Los alumnos que ya lo tienen no se modifican, así que puedes volver a pulsar el botón cuando se registre alguien nuevo.</p>
+        <button class="primario" id="btn-generar-casos" type="button">Generar casos de la sesión 2</button>
+        <div class="tabla-scroll" style="margin-top: 12px;">
+          <table>
+            <thead>
+              <tr><th>Alumno</th><th>Encargo</th><th>Nota</th><th>Emails (1,5)</th><th>Duplicados (2)</th><th>Segmento (2,5)</th><th>Acción (1)</th><th>Consultas (3)</th></tr>
+            </thead>
+            <tbody id="tabla-sesion2"></tbody>
+          </table>
+        </div>
+        <h2 style="margin-top: 20px;">Acierto por pregunta del banco</h2>
+        <p class="vacio">Cada alumno recibe cinco de las veinte preguntas del banco. Aquí ves cuántos la han respondido y qué porcentaje acierta.</p>
+        <table>
+          <thead>
+            <tr><th>Pregunta</th><th>Respondidas</th><th>% acierto</th></tr>
+          </thead>
+          <tbody id="tabla-respuestas"></tbody>
+        </table>
+      </div>
+
+      <div id="detalle-alumno" class="card oculto">
+        <h2 id="titulo-detalle"></h2>
+        <table>
+          <thead>
+            <tr><th style="width: 30%;">Cliente</th><th>Interacciones y oportunidades</th></tr>
+          </thead>
+          <tbody id="tabla-detalle"></tbody>
+        </table>
       </div>
     </main>
   </section>
